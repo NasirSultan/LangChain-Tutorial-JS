@@ -8,7 +8,7 @@ import { BufferMemory } from "langchain/memory";
 
 
 const chat = new ChatGoogleGenerativeAI({
-  apiKey: "AIzaSyCOHvkgqyBzOebZjKAyx8oVYHzEwxxgQGE", 
+  apiKey: "<your-api-key>", 
   model: "models/gemini-1.5-flash",
   temperature: 0.7,
   maxOutputTokens: 2048,
