@@ -1,4 +1,4 @@
-#  Company Name Prompt Formatter – LangChain Example
+#  Prompt Formatting – LangChain Example
 
 ## Overview
 
