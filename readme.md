@@ -17,7 +17,7 @@ This project lets you ask questions about the contents of a PDF file using LangC
 
 ## Setup
 
-1. Place your PDF file (e.g., `cybersecurety.pdf`) in the project folder.
+1. Place your PDF file (e.g., `add your pdf`) in the project folder.
 2. Install the dependencies with `npm install`.
 3. Replace the placeholder Gemini API key in the code with your own.
 
@@ -35,7 +35,7 @@ This project lets you ask questions about the contents of a PDF file using LangC
 
 ## Project Structure
 
-* PDF file (e.g., `cybersecurety.pdf`)
+* PDF file (e.g., `Your pdf`)
 * Main script (`index.js`)
 * `package.json` for dependencies
 

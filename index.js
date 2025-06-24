@@ -20,7 +20,7 @@ const askUser = (question) =>
 
 const run = async () => {
   console.log("Loading PDF...");
-  const loader = new PDFLoader("cybersecurety.pdf");
+  const loader = new PDFLoader("your.pdf");
   const docs = await loader.load();
 
   const splitter = new RecursiveCharacterTextSplitter({
