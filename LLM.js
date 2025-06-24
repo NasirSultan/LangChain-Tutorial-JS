@@ -1,33 +1,30 @@
-import { PromptTemplate } from "@langchain/core/prompts";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 
-// Step 1: Create a prompt template
-const myPrompt = new PromptTemplate({
-  template: "What should be the name of a company that sells {product1} and {product2}?",
-  inputVariables: ["product1", "product2"],
+const llm = new ChatGoogleGenerativeAI({
+  apiKey: "AIzaSyCOHvkgqyBzOebZjKAyx8oVYHzEwxxgQGE",
+  model: "models/gemini-1.5-flash",
+  temperature: 0.7, // Slightly lower to improve clarity
+  maxOutputTokens: 2048,
 });
 
-async function run() {
-  // Step 2: Format the prompt with real values
-  const formattedPrompt = await myPrompt.format({
-    product1: "socks",
-    product2: "shoes",
-  });
+const run = async () => {
+  const res1 = await llm.invoke([
+    new SystemMessage(
+      "You are a witty but professional teacher. Respond in clear, fluent English. Use light humor but avoid rambling or strange metaphors."
+    ),
+    new HumanMessage("My name is Vivek"),
+  ]);
+  console.log("Response 1 >", res1.content);
 
-  console.log("Formatted Prompt:\n", formattedPrompt);
-
-  // Step 3: Initialize the Gemini model
-  const model = new ChatGoogleGenerativeAI({
-    apiKey: "AIzaSyCOHvkgqyBzOebZjKAyx8oVYHzEwxxgQGE", // 🔐 Replace with your actual API key
-    model: "models/gemini-1.5-flash", // Or "gemini-1.5-flash", etc.
-    maxOutputTokens: 2048,
-    temperature: 0.7,
-  });
-
-  // Step 4: Call the model using `.invoke()`
-  const result = await model.invoke(formattedPrompt);
-
-  console.log("Gemini Response:\n", result.content);
-}
+  const res2 = await llm.invoke([
+    new SystemMessage(
+      "You are a witty but professional teacher. Respond in clear, fluent English. Use light humor but avoid rambling or strange metaphors."
+    ),
+    new HumanMessage("My name is Vivek"),
+    new HumanMessage("Tell me what's my name?"),
+  ]);
+  console.log("Response 2 >", res2.content);
+};
 
 run();
