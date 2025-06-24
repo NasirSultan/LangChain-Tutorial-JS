@@ -1,30 +1,43 @@
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import { ConversationChain } from "langchain/chains";
+import {
+  ChatPromptTemplate,
+  MessagesPlaceholder,
+} from "@langchain/core/prompts";
+import { BufferMemory } from "langchain/memory";
 
-const llm = new ChatGoogleGenerativeAI({
-  apiKey: "AIzaSyCOHvkgqyBzOebZjKAyx8oVYHzEwxxgQGE",
+// Step 1: Create Gemini chat model
+const chat = new ChatGoogleGenerativeAI({
+  apiKey: "AIzaSyCOHvkgqyBzOebZjKAyx8oVYHzEwxxgQGE", // Use environment variable in production
   model: "models/gemini-1.5-flash",
-  temperature: 0.7, // Slightly lower to improve clarity
+  temperature: 0.7,
   maxOutputTokens: 2048,
 });
 
-const run = async () => {
-  const res1 = await llm.invoke([
-    new SystemMessage(
-      "You are a witty but professional teacher. Respond in clear, fluent English. Use light humor but avoid rambling or strange metaphors."
-    ),
-    new HumanMessage("My name is Vivek"),
-  ]);
-  console.log("Response 1 >", res1.content);
+// Step 2: Define prompt template with memory placeholder
+const chatPrompt = ChatPromptTemplate.fromMessages([
+  ["system", "You are a friendly and helpful AI. Keep responses short and clear."],
+  new MessagesPlaceholder("history"),
+  ["human", "{input}"],
+]);
 
-  const res2 = await llm.invoke([
-    new SystemMessage(
-      "You are a witty but professional teacher. Respond in clear, fluent English. Use light humor but avoid rambling or strange metaphors."
-    ),
-    new HumanMessage("My name is Vivek"),
-    new HumanMessage("Tell me what's my name?"),
-  ]);
-  console.log("Response 2 >", res2.content);
+// Step 3: Setup memory and conversation chain
+const chain = new ConversationChain({
+  llm: chat,
+  prompt: chatPrompt,
+  memory: new BufferMemory({
+    returnMessages: true,
+    memoryKey: "history",
+  }),
+});
+
+// Step 4: Run chat with memory
+const runChat = async () => {
+  const res1 = await chain.call({ input: "Hi, my name is Ali." });
+  console.log("Bot:", res1.response);
+
+  const res2 = await chain.call({ input: "What’s my name?" });
+  console.log("Bot:", res2.response);
 };
 
-run();
+runChat();
