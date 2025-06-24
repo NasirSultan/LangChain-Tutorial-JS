@@ -2,7 +2,7 @@ import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 
 const llm = new ChatGoogleGenerativeAI({
-  apiKey: "AIzaSyCOHvkgqyBzOebZjKAyx8oVYHzEwxxgQGE",
+  apiKey: "your-google-api-key", 
   model: "models/gemini-1.5-flash",
   temperature: 0.9, 
   maxOutputTokens: 2048,
