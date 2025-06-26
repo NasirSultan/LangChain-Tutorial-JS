@@ -1,22 +1,11 @@
-# LangChain JS Tutorial: with Gemini
+// IMPORTANT - Add your API keys here. Be careful not to publish them.
+process.env.GOOGLE_API_KEY = "AIzaSyCOHvkgqyBzOebZjKAyx8oVYHzEwxxgQGE";
+process.env.TAVILY_API_KEY = "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";
 
-I'm happy to share a beginner-friendly tutorial that walks through the **core concepts of LangChain JS** using **Google Gemini** as the LLM. This tutorial is divided into **5 focused parts**, each available in a separate GitHub branch to help you learn step-by-step.
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 
----
-
-##  Tutorial Structure
-
-Each part of the tutorial is isolated in its **own branch**:
-
-1. **`prompt`** – Creating dynamic prompt templates with variables  
-2. **`llm`** – Understanding and invoking LLMs using LangChain  
-3. **`llm-model`** – Using Gemini Flash 1.5 with LangChain JS  
-4. **`memory`** – Adding memory to retain conversation history  
-5. **`read-pdf`** – Reading PDFs and answering questions from the content
-
-You can switch between these branches using:
-
-```bash
-git checkout prompt
-git checkout llm
-# etc.
+const agentTools = [new TavilySearchResults({ maxResults: 3 })];
+const agentModel = new ChatGoogleGenerativeAI({
+  model: "models/gemini-1.5-flash", // or another supported Gemini model
+  temperature: 0.7,
+});
