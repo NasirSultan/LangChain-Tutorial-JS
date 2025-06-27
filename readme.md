@@ -1,11 +1,14 @@
-// IMPORTANT - Add your API keys here. Be careful not to publish them.
-process.env.GOOGLE_API_KEY = "AIzaSyCOHvkgqyBzOebZjKAyx8oVYHzEwxxgQGE";
-process.env.TAVILY_API_KEY = "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";
 
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+## Smart Product Assistant for Price and Inventory Queries
 
-const agentTools = [new TavilySearchResults({ maxResults: 3 })];
-const agentModel = new ChatGoogleGenerativeAI({
-  model: "models/gemini-1.5-flash", // or another supported Gemini model
-  temperature: 0.7,
-});
+**Description:**
+This is a command-line assistant that helps users ask questions about products, such as:
+
+* Listing all available products
+* Getting the latest price of a specific product
+* Pulling recent data from product change logs (like updates or deletions)
+
+It understands natural language queries, detects the user's intent (such as "list products" or "get price of iPhone"), and generates clear, helpful responses.
+
+Ideal for support teams, inventory managers, or internal tools that need quick product insights from a database.
+
