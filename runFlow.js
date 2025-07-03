@@ -1,10 +1,11 @@
 import { StateGraph } from "@langchain/langgraph";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
+import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf"; // ✅ This stays
+import fs from "fs/promises";
 import { z } from "zod";
 import dotenv from "dotenv";
-dotenv.config();
 
+dotenv.config();
 
 const stateSchema = z.object({
   filePath: z.string(),
@@ -15,20 +16,21 @@ const stateSchema = z.object({
   improvedResume: z.string().optional(),
 });
 
-
 const model = new ChatGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_API_KEY,
   model: "models/gemini-1.5-flash",
   temperature: 0.7,
 });
 
-
 const load_pdf = async (state) => {
-  const loader = new PDFLoader(state.filePath);
+  console.log("📥 load_pdf received path:", state.filePath);
+  if (!state.filePath) throw new Error("❌ load_pdf: state.filePath is undefined");
+  const buffer = await fs.readFile(state.filePath);
+  const loader = new PDFLoader(buffer, { parsedExtension: ".pdf" });
   const docs = await loader.load();
-  const resumeText = docs.map((d) => d.pageContent).join("\n");
-  return { resumeText };
+  return { resumeText: docs.map(d => d.pageContent).join("\n") };
 };
+
 
 const analyze_resume = async (state) => {
   const prompt = `Analyze this resume for the role of "${state.targetRole}". Give ATS score and brief feedback.\n\nResume:\n${state.resumeText}`;
@@ -48,7 +50,6 @@ const generate_resume = async (state) => {
   return { improvedResume: res.content };
 };
 
-
 const builder = new StateGraph({ channels: stateSchema })
   .addNode("load_pdf", load_pdf)
   .addNode("analyze", analyze_resume)
@@ -57,13 +58,13 @@ const builder = new StateGraph({ channels: stateSchema })
   .addEdge("load_pdf", "analyze")
   .addEdge("analyze", "suggest")
   .addEdge("suggest", "generate")
-  .addEdge("generate", "end")
-  .setEntryPoint("load_pdf"); 
+  .setEntryPoint("load_pdf");
 
 
 const graph = builder.compile();
 
 export async function runFlow(filePath, targetRole) {
-  const result = await graph.invoke({ filePath, targetRole });
+  console.log("🛠️ Received in runFlow:", filePath, targetRole);
+  const result = await graph.invoke({ filePath, targetRole }); // ✅ correct
   return result;
 }
