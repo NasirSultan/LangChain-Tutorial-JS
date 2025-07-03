@@ -1,6 +1,6 @@
 import { StateGraph } from "@langchain/langgraph";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf"; // ✅ This stays
+import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import fs from "fs/promises";
 import { z } from "zod";
 import dotenv from "dotenv";
@@ -23,14 +23,12 @@ const model = new ChatGoogleGenerativeAI({
 });
 
 const load_pdf = async (state) => {
-  console.log("📥 load_pdf received path:", state.filePath);
-  if (!state.filePath) throw new Error("❌ load_pdf: state.filePath is undefined");
+  if (!state.filePath) throw new Error("Missing filePath");
   const buffer = await fs.readFile(state.filePath);
   const loader = new PDFLoader(buffer, { parsedExtension: ".pdf" });
   const docs = await loader.load();
   return { resumeText: docs.map(d => d.pageContent).join("\n") };
 };
-
 
 const analyze_resume = async (state) => {
   const prompt = `Analyze this resume for the role of "${state.targetRole}". Give ATS score and brief feedback.\n\nResume:\n${state.resumeText}`;
@@ -60,11 +58,8 @@ const builder = new StateGraph({ channels: stateSchema })
   .addEdge("suggest", "generate")
   .setEntryPoint("load_pdf");
 
-
 const graph = builder.compile();
 
 export async function runFlow(filePath, targetRole) {
-  console.log("🛠️ Received in runFlow:", filePath, targetRole);
-  const result = await graph.invoke({ filePath, targetRole }); // ✅ correct
-  return result;
+  return await graph.invoke({ filePath, targetRole });
 }
