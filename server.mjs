@@ -130,10 +130,10 @@ Make sure the improved resume is:
     const result = await llm.invoke(improvePrompt);
     res.json({ improved: result.content.trim() });
   } catch (err) {
-    console.error("❌ Resume improvement error:", err.message);
+    console.error(" Resume improvement error:", err.message);
     res.status(500).json({ error: "Failed to improve resume" });
   }
 });
 
 
-app.listen(3001, () => console.log("🚀 API running on http://localhost:3001"));
+app.listen(3001, () => console.log("API running on http://localhost:3001"));
