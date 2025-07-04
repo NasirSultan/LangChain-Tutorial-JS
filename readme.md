@@ -1,22 +1,45 @@
-# LangChain JS Tutorial: with Gemini
+# Retrieval-Augmented Generation (RAG) using LangChain and LangGraph
 
-I'm happy to share a beginner-friendly tutorial that walks through the **core concepts of LangChain JS** using **Google Gemini** as the LLM. This tutorial is divided into **5 focused parts**, each available in a separate GitHub branch to help you learn step-by-step.
+This project demonstrates a simple RAG system built with LangChain and LangGraph using only two files:
 
----
+- `index.js` – contains all logic: loading text, chunking, embedding, graph flow, and LLM answering.
 
-##  Tutorial Structure
+## Concept
 
-Each part of the tutorial is isolated in its **own branch**:
+The Retrieval-Augmented Generation (RAG) architecture improves LLM responses by retrieving relevant information from external knowledge 
 
-1. **`prompt`** – Creating dynamic prompt templates with variables  
-2. **`llm`** – Understanding and invoking LLMs using LangChain  
-3. **`llm-model`** – Using Gemini Flash 1.5 with LangChain JS  
-4. **`memory`** – Adding memory to retain conversation history  
-5. **`read-pdf`** – Reading PDFs and answering questions from the content
+### Flow
 
-You can switch between these branches using:
+1. Load text content from `bodytext.js`.
+2. Split the text into manageable chunks.
+3. Embed each chunk into vector space using a language embedding model.
+4. Store embeddings in a temporary memory vector store.
+5. Use LangGraph to define a series of steps (nodes) in a graph:
+   - Split → Embed → Retrieve → Generate
+6. Ask the user a question.
+7. Retrieve the most relevant chunks from the vector store.
+8. Send them to the LLM to generate the final answer.
+
+## File Descriptions
+
+### index.js
+
+- Loads `bodytext.js`
+- Chunks the text
+- Embeds chunks and stores them
+- Uses LangGraph to define nodes and edges
+- Accepts a user question and generates a context-based answer
+
+### bodytext.txt
+
+- Place your input document/text here
+- This file should contain the raw content the system will use for retrieval and answering
+
+## Setup
+
+1. Clone or download the project
+2. Add your text content to `bodytext.js`
+3. Install dependencies:
 
 ```bash
-git checkout prompt
-git checkout llm
-# etc.
+npm install
