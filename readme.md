@@ -1,35 +1,69 @@
 
-## Wikipedia Query Script (Node.js and LangChain)
 
-This project demonstrates how to retrieve summarized information from Wikipedia using two approaches:
+# LangChain Gemini Tool-Calling Calculator Agent
 
-1. **Using node-fetch with Wikipedia's REST API**
-   The script first performs a search query through Wikipedia’s API to identify the most relevant article based on the given input (e.g., "Pakistan"). It then fetches the summary of the top search result and displays it.
+This project showcases the use of **tool calling with Gemini 1.5 Flash** using LangChain in Node.js. Instead of only replying with text, the language model can decide to **invoke an external function (a tool)** — allowing it to perform real actions like mathematical operations.
 
-2. **Using LangChain's WikipediaQueryRun tool**
-   This approach leverages LangChain’s built-in Wikipedia tool to retrieve relevant information for a query. It simplifies access to Wikipedia content and can be integrated directly into LangChain-based agents.
+## Core Idea: Tool Calling
 
-### Features
+The agent doesn't just generate answers — it **detects intent** (like a math operation), and if needed, **calls a tool** with structured inputs to compute the result.
 
-* Executes search and summary retrieval via Wikipedia’s API
-* Supports automatic extraction of the top search result
-* Uses LangChain for streamlined tool-based access to Wikipedia content
-* Trims long content for concise display
+Example:
+User asks: *“What’s 3 times 12?”*
+→ The Gemini model generates a **tool call** to the `calculator` tool
+→ LangChain executes the tool
+→ The result is returned back to Gemini to complete the conversation
 
-### Sample Output
+Tool calling makes the AI more interactive, safe, and capable of extending beyond its own reasoning.
 
-Best Wikipedia Result for "Pakistan":
-Title: Pakistan
-Summary: Pakistan, officially the Islamic Republic of Pakistan, is a country in South Asia. It is the world's fifth-most populous country and has the world's second-largest Muslim population.
+---
 
-Wikipedia Result:
-Pakistan, officially the Islamic Republic of Pakistan, is a country in South Asia...
+## What the Agent Can Do
 
-### How to Run
+* **Understands natural language input**
+* Automatically decides when a tool call is needed
+* Uses a calculator tool to handle:
 
-Run the script using Node.js after installing dependencies:
+  * Addition
+  * Subtraction
+  * Multiplication
+  * Division
+* Validates tool inputs with Zod schema
+* Cleanly separates LLM thinking from tool execution
 
-* node-fetch
-* @langchain/community
+---
 
+## How It Works (Flow)
 
+1. **LLM receives user input**
+2. **LLM decides to call a tool** (e.g., `calculator`) with structured arguments
+3. LangChain executes the tool
+4. Tool returns a result as a string
+5. Gemini model may generate a final answer using that result
+
+This is known as the **structured tool use** paradigm.
+
+---
+
+## Technologies Used
+
+* LangChain (JavaScript/Node.js)
+* Gemini 1.5 Flash model
+* Zod (for tool input validation)
+* dotenv (for API key configuration)
+
+---
+
+## Why Tool Calls Matter
+
+* They make the AI **actionable** — able to do more than just "talk"
+* Tool calls are **explicit and interpretable**, not hidden in generated text
+* You can chain tools together to build powerful multi-function agents
+
+---
+
+## Future Ideas
+
+* Add more tools (e.g., date/time, currency conversion)
+* Build a full CLI or web-based chat agent
+* Introduce decision logic for multi-step reasoning and workflows

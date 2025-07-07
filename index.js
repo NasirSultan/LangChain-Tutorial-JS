@@ -35,6 +35,8 @@ const calculatorTool = tool(
   }
 );
 const llmWithTools = llm.bindTools([calculatorTool]);
-const res = await llmWithTools.invoke("hello");
+const res = await llmWithTools.invoke("What is 3 * 12? Also, what is 11 + 49?");
 
-console.log(res);
+
+
+console.log(res.tool_calls);
