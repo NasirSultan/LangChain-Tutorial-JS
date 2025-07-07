@@ -2,15 +2,13 @@ import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 
 export const addTool = tool(
-  ({ x, y }) => {
-    return `The result of ${x} + ${y} is ${x + y}`;
-  },
+  ({ x, y }) => `The result of ${x} + ${y} is ${x + y}`,
   {
     name: "add",
-    description: "Adds two numbers and returns the result.",
+    description: "Adds two numbers",
     schema: z.object({
-      x: z.number().describe("The first number"),
-      y: z.number().describe("The second number"),
+      x: z.number(),
+      y: z.number(),
     }),
   }
 );

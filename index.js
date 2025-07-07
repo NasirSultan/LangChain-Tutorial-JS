@@ -1,10 +1,32 @@
-import 'dotenv/config';
-import readline from 'readline';
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { reverseTool } from "./tools/reverseTool.js";
-import { addTool } from "./tools/mathTool.js";
-import { ToolMessage } from "@langchain/core/messages";
+// LangGraph + Gemini + Tools (like React agents)
 
+import 'dotenv/config';
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { z } from "zod";
+import { tool, ToolMessage } from "@langchain/core/tools";
+import { Graph } from "langgraph";
+import { HumanMessage } from "@langchain/core/messages";
+
+// Tools
+const reverseTool = tool(
+  ({ text }) => text.split("").reverse().join(""),
+  {
+    name: "reverseString",
+    description: "Reverses the given string",
+    schema: z.object({ text: z.string() })
+  }
+);
+
+const addTool = tool(
+  ({ x, y }) => `The result of ${x} + ${y} is ${x + y}`,
+  {
+    name: "add",
+    description: "Adds two numbers",
+    schema: z.object({ x: z.number(), y: z.number() })
+  }
+);
+
+// Gemini with tools
 const model = new ChatGoogleGenerativeAI({
   model: "gemini-1.5-flash",
   apiKey: process.env.GOOGLE_API_KEY,
@@ -13,53 +35,53 @@ const model = new ChatGoogleGenerativeAI({
 
 const modelWithTools = model.bindTools([reverseTool, addTool]);
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
+// Graph State
+const state = {
+  input: {
+    value: "string",
+  },
+  toolsUsed: {
+    value: "any",
+    default: [],
+  },
+  output: {
+    value: "string",
+    default: "",
+  },
+};
 
-rl.question("Enter your question: ", async (userInput) => {
-  const messages = [
-    ["system", "You can use tools like reverseString and add."],
-    ["human", userInput],
-  ];
+// Nodes
+const askGemini = async ({ input }) => {
+  const messages = [new HumanMessage(input)];
+  const response = await modelWithTools.invoke(messages);
+  return { toolsUsed: response.tool_calls || [], llmResponse: response };
+};
 
-  const firstResponse = await modelWithTools.invoke(messages);
-  const toolCalls = firstResponse.tool_calls || firstResponse.additional_kwargs?.tool_calls;
-
-  if (toolCalls?.length > 0) {
-    const toolMessages = [];
-
-    for (const toolCall of toolCalls) {
-      const { name, args, id } = toolCall;
-
-      let toolResult;
-      if (name === "reverseString") {
-        toolResult = await reverseTool.invoke(args);
-      } else if (name === "add") {
-        toolResult = await addTool.invoke(args);
-      } else {
-        continue;
-      }
-
-      toolMessages.push(
-        new ToolMessage({
-          tool_call_id: id,
-          content: toolResult,
-        })
-      );
-    }
-
-    const finalResponse = await model.invoke([
-      ...messages,
-      firstResponse,
-      ...toolMessages,
-    ]);
-
-    console.log(finalResponse.content);
-  } else {
-    console.log(firstResponse.content);
+const callTools = async ({ toolsUsed, llmResponse }) => {
+  const toolMessages = [];
+  for (const toolCall of toolsUsed) {
+    const { name, args, id } = toolCall;
+    const tool = name === "reverseString" ? reverseTool : addTool;
+    const result = await tool.invoke(args);
+    toolMessages.push(new ToolMessage({ tool_call_id: id, content: result }));
   }
+  const finalResponse = await model.invoke([llmResponse, ...toolMessages]);
+  return { output: finalResponse.content };
+};
 
+// Graph
+const graph = new Graph({ state });
+graph.addNode("askGemini", askGemini);
+graph.addNode("callTools", callTools);
+graph.setEntryPoint("askGemini");
+graph.addEdge("askGemini", "callTools");
+
+// CLI
+import readline from "readline";
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+
+rl.question("Ask me something: ", async (userInput) => {
+  const result = await graph.invoke({ input: userInput });
+  console.log("Result:", result.output);
   rl.close();
 });
