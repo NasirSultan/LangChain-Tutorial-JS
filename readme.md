@@ -1,22 +1,34 @@
-# LangChain JS Tutorial: with Gemini
 
-I'm happy to share a beginner-friendly tutorial that walks through the **core concepts of LangChain JS** using **Google Gemini** as the LLM. This tutorial is divided into **5 focused parts**, each available in a separate GitHub branch to help you learn step-by-step.
+## Wikipedia Query Script (Node.js and LangChain)
 
----
+This project demonstrates how to retrieve summarized information from Wikipedia using two approaches:
 
-##  Tutorial Structure
+1. **Using node-fetch with Wikipedia's REST API**
+   The script first performs a search query through Wikipedia’s API to identify the most relevant article based on the given input (e.g., "Pakistan"). It then fetches the summary of the top search result and displays it.
 
-Each part of the tutorial is isolated in its **own branch**:
+2. **Using LangChain's WikipediaQueryRun tool**
+   This approach leverages LangChain’s built-in Wikipedia tool to retrieve relevant information for a query. It simplifies access to Wikipedia content and can be integrated directly into LangChain-based agents.
 
-1. **`prompt`** – Creating dynamic prompt templates with variables  
-2. **`llm`** – Understanding and invoking LLMs using LangChain  
-3. **`llm-model`** – Using Gemini Flash 1.5 with LangChain JS  
-4. **`memory`** – Adding memory to retain conversation history  
-5. **`read-pdf`** – Reading PDFs and answering questions from the content
+### Features
 
-You can switch between these branches using:
+* Executes search and summary retrieval via Wikipedia’s API
+* Supports automatic extraction of the top search result
+* Uses LangChain for streamlined tool-based access to Wikipedia content
+* Trims long content for concise display
 
-```bash
-git checkout prompt
-git checkout llm
-# etc.
+### Sample Output
+
+Best Wikipedia Result for "Pakistan":
+Title: Pakistan
+Summary: Pakistan, officially the Islamic Republic of Pakistan, is a country in South Asia. It is the world's fifth-most populous country and has the world's second-largest Muslim population.
+
+Wikipedia Result:
+Pakistan, officially the Islamic Republic of Pakistan, is a country in South Asia...
+
+### How to Run
+
+Run the script using Node.js after installing dependencies:
+
+* node-fetch
+* @langchain/community
+
