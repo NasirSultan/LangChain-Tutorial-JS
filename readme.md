@@ -1,69 +1,119 @@
 
+# LangChain Tool-Binding Demo with Gemini LLM
 
-# LangChain Gemini Tool-Calling Calculator Agent
+This project demonstrates how to bind **custom tools** and **built-in tools** (like Wikipedia search) with a **Gemini LLM** using **LangChain**.
 
-This project showcases the use of **tool calling with Gemini 1.5 Flash** using LangChain in Node.js. Instead of only replying with text, the language model can decide to **invoke an external function (a tool)** — allowing it to perform real actions like mathematical operations.
-
-## Core Idea: Tool Calling
-
-The agent doesn't just generate answers — it **detects intent** (like a math operation), and if needed, **calls a tool** with structured inputs to compute the result.
-
-Example:
-User asks: *“What’s 3 times 12?”*
-→ The Gemini model generates a **tool call** to the `calculator` tool
-→ LangChain executes the tool
-→ The result is returned back to Gemini to complete the conversation
-
-Tool calling makes the AI more interactive, safe, and capable of extending beyond its own reasoning.
+It is beginner-friendly, cleanly structured, and helps you build powerful AI agents that can:
+- Solve math problems using custom tools
+- Fetch real-time information using built-in tools like Wikipedia
+- Automatically decide which tool to use based on user input
 
 ---
 
-## What the Agent Can Do
+## Project Structure
 
-* **Understands natural language input**
-* Automatically decides when a tool call is needed
-* Uses a calculator tool to handle:
+```
 
-  * Addition
-  * Subtraction
-  * Multiplication
-  * Division
-* Validates tool inputs with Zod schema
-* Cleanly separates LLM thinking from tool execution
+langchain-tools-demo/
+│
+├── addTool.js           # Custom tool: adds two numbers
+├── multiplyTool.js      # Custom tool: multiplies two numbers
+└── wikiTool.js          # Built-in tool: Wikipedia search
+│
+└── index.js                 # Main file that binds tools to Gemini LLM
 
----
-
-## How It Works (Flow)
-
-1. **LLM receives user input**
-2. **LLM decides to call a tool** (e.g., `calculator`) with structured arguments
-3. LangChain executes the tool
-4. Tool returns a result as a string
-5. Gemini model may generate a final answer using that result
-
-This is known as the **structured tool use** paradigm.
+````
 
 ---
 
-## Technologies Used
+## Getting Started
 
-* LangChain (JavaScript/Node.js)
-* Gemini 1.5 Flash model
-* Zod (for tool input validation)
-* dotenv (for API key configuration)
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-username/langchain-tools-demo.git
+cd langchain-tools-demo
+````
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Set Up Environment Variables
+
+Create a `.env` file and add your Gemini API key:
+
+```env
+GOOGLE_API_KEY=your_google_generative_ai_key
+```
+
+### 4. Run the Project
+
+```bash
+node index.js
+```
 
 ---
 
-## Why Tool Calls Matter
+## How It Works
 
-* They make the AI **actionable** — able to do more than just "talk"
-* Tool calls are **explicit and interpretable**, not hidden in generated text
-* You can chain tools together to build powerful multi-function agents
+* `index.js` sets up the Gemini LLM with tool support using `bindTools()`.
+* When the user sends a message, the model:
+
+  * Analyzes the query
+  * Calls tools if needed (math or Wikipedia)
+  * Returns a final answer after tool outputs are used
+* All logic is handled automatically by LangChain and Gemini.
 
 ---
 
-## Future Ideas
+## Example
 
-* Add more tools (e.g., date/time, currency conversion)
-* Build a full CLI or web-based chat agent
-* Introduce decision logic for multi-step reasoning and workflows
+User input:
+
+```
+What is 3 * 12? What is 11 + 49? Tell me about Pakistan.
+```
+
+Output:
+
+```
+Final Answer:
+3 * 12 is 36. 11 + 49 is 60. Here's a brief summary about Pakistan: ...
+```
+
+---
+
+## Tools Included
+
+### Custom Tools
+
+* `add`: Adds two numbers
+* `multiply`: Multiplies two numbers
+
+### Built-in Tool
+
+* `wiki_search`: Uses `WikipediaQueryRun` to fetch a summary
+
+---
+
+## Tags
+
+`LangChain` `LLM` `Gemini` `LangChainTools` `WikipediaQueryRun`
+`ToolBinding` `BeginnerFriendly` `AItools` `CustomTools`
+
+---
+
+## License
+
+MIT — feel free to use and modify.
+
+---
+
+## Support
+
+If you need help or want to extend this project (such as adding a weather tool, CLI version, or LangGraph integration), feel free to open an issue or contribute.
+
+

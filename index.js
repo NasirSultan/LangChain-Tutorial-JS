@@ -1,40 +1,44 @@
-import "dotenv/config"
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai"; 
-import { tool } from "@langchain/core/tools";
-import { z } from "zod";
-const llm= new ChatGoogleGenerativeAI({
-  model: "models/gemini-1.5-flash", // or "gemini-pro"
-  temperature: 0.7,
-});
-const calculatorSchema = z.object({
-  operation: z
-    .enum(["add", "subtract", "multiply", "divide"])
-    .describe("The type of operation to execute."),
-  number1: z.number().describe("The first number to operate on."),
-  number2: z.number().describe("The second number to operate on."),
-});
-const calculatorTool = tool(
-  async ({ operation, number1, number2 }) => {
-    // Functions must return strings
-    if (operation === "add") {
-      return `${number1 + number2}`;
-    } else if (operation === "subtract") {
-      return `${number1 - number2}`;
-    } else if (operation === "multiply") {
-      return `${number1 * number2}`;
-    } else if (operation === "divide") {
-      return `${number1 / number2}`;
-    } else {
-      throw new Error("Invalid operation.");
-    }
-  },
-  {
-    name: "calculator",
-    description: "Can perform mathematical operations.",
-    schema: calculatorSchema,
-  }
-);
-const llmWithTools = llm.bindTools([calculatorTool]);
-const res = await llmWithTools.invoke("hello");
+import "dotenv/config";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { HumanMessage } from "@langchain/core/messages";
 
-console.log(res);
+
+import { addTool } from "./addTool.js";
+import { multiplyTool } from "./multiplyTool.js";
+import { wikiTool } from "./wikiTool.js";
+
+
+const tools = [addTool, multiplyTool, wikiTool];
+
+const llm = new ChatGoogleGenerativeAI({
+  model: "gemini-2.0-flash",
+  temperature: 0,
+});
+
+const llmWithTools = llm.bindTools(tools);
+
+
+const messages = [
+  new HumanMessage("What is 3 * 12? What is 11 + 49? Tell me about Pakistan."),
+];
+
+
+const aiMessage = await llmWithTools.invoke(messages);
+messages.push(aiMessage);
+
+
+const toolsByName = {
+  add: addTool,
+  multiply: multiplyTool,
+  wiki_search: wikiTool,
+};
+
+for (const toolCall of aiMessage.tool_calls ?? []) {
+  const selectedTool = toolsByName[toolCall.name];
+  const toolMessage = await selectedTool.invoke(toolCall);
+  messages.push(toolMessage);
+}
+
+
+const finalAnswer = await llmWithTools.invoke(messages);
+console.log("\n Final Answer:\n", finalAnswer.content);
