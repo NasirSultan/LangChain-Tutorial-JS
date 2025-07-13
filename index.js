@@ -1,57 +1,47 @@
-import "dotenv/config";
+import 'dotenv/config';
 import { ChatMistralAI } from "@langchain/mistralai";
-import { initializeAgentExecutorWithOptions } from "langchain/agents";
-import { BufferMemory } from "langchain/memory";
-import { DynamicTool } from "langchain/tools";
+import { PlanAndExecuteAgentExecutor } from "langchain/experimental/plan_and_execute";
+import { DynamicStructuredTool } from "@langchain/core/tools";
+import { z } from "zod";
 import { evaluate } from "mathjs";
 
-
-// ===== Calculator Tool =====
-const Calculator = new DynamicTool({
-  name: "calculator",
-  description: "Evaluates basic math expressions like 2 + 3 * 5 or (10 + 5) / 2.",
-  func: async (input) => {
+// Custom tools
+const getMyInfo = new DynamicStructuredTool({
+  name: "getMyInfo",
+  description: "Return developer’s skills",
+  schema: z.object({ query: z.string() }),
+  func: ({ query }) => query === "skills" ? "JavaScript, Node.js, React, AI, LangChain" : "Unknown",
+});
+const mathTool = new DynamicStructuredTool({
+  name: "mathCalculator",
+  description: "Evaluate math expressions",
+  schema: z.object({ expression: z.string() }),
+  func: ({ expression }) => {
     try {
-      const result = evaluate(input);
-      return `The result is ${result}`;
-    } catch (err) {
-      return "Invalid math expression.";
+      return `Result: ${evaluate(expression)}`;
+    } catch (e) {
+      return `Error: ${e.message}`;
     }
   },
 });
+const tools = [getMyInfo, mathTool];
 
-
-// ===== Mistral Model =====
+// LLM setup
 const llm = new ChatMistralAI({
   model: "mistral-large-latest",
   temperature: 0,
-  apiKey: process.env.MISTRAL_API_KEY,
 });
 
-
-// ===== Memory =====
-const memory = new BufferMemory({
-  returnMessages: true,
-  memoryKey: "chat_history",
-});
-
-
-// ===== Agent Executor =====
-const tools = [Calculator];
-
-const executor = await initializeAgentExecutorWithOptions(
-  tools,
+// Create executor
+const executor = await PlanAndExecuteAgentExecutor.fromLLMAndTools({
   llm,
-  {
-    agentType: "chat-conversational-react-description",
-    memory,
-    verbose: true,
-  }
-);
+  tools,
+  verbose: true
+});
 
+// Invoke
+const result = await executor.invoke({
+  input: "Get my skills and calculate 13 * 7.",
+});
 
-const res1 = await executor.call({ input: "What is 25 + 75?" });
-console.log(" Response 1:", res1.output);
-
-const res2 = await executor.call({ input: "Multiply that by 2" });
-console.log(" Response 2:", res2.output);
+console.log("\n✅ Result:\n", result);
