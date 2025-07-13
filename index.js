@@ -1,25 +1,39 @@
-// index.js
-import "dotenv/config";
+import { AgentExecutor, createOpenAIFunctionsAgent } from "langchain/agents";
+import { pull } from "langchain/hub";
 import { ChatMistralAI } from "@langchain/mistralai";
-import { initializeAgentExecutorWithOptions } from "langchain/agents";
+
+// Load tools
 import { WikipediaTool } from "./wikipediaTool.js";
+import { YourDataTool } from "./yourDataTool.js";
 
-const model = new ChatMistralAI({
+// Load prompt
+const prompt = await pull("hwchase17/openai-functions-agent");
+
+// Use Mistral model
+const llm = new ChatMistralAI({
   model: "mistral-large-latest",
-  temperature: 0.7,
-  apiKey: process.env.MISTRAL_API_KEY,
+  temperature: 0,
 });
 
-const tools = [WikipediaTool];
+// Tools
+const tools = [WikipediaTool, YourDataTool];
 
-const executor = await initializeAgentExecutorWithOptions(tools, model, {
-  agentType: "structured-chat-zero-shot-react-description", // ✅ STRUCTURED agent
-  verbose: true,
+// Create agent
+const agent = await createOpenAIFunctionsAgent({
+  llm,
+  tools,
+  prompt,
 });
 
-const input = "Who was Nikola Tesla and what did he invent?";
-console.log(`\n Asking: ${input}`);
+// Agent executor
+const agentExecutor = new AgentExecutor({
+  agent,
+  tools,
+});
 
-const result = await executor.invoke({ input });
+// Run agent
+const result = await agentExecutor.invoke({
+  input: "Tell me about Nasir's projects.",
+});
 
-console.log(`\n Final Answer:\n${result.output}`);
+console.log("Answer:", result);
