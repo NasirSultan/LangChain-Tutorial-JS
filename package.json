@@ -17,6 +17,7 @@
     "@langchain/mistralai": "^0.2.1",
     "dotenv": "^16.5.0",
     "langchain": "^0.3.29",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "wikipedia": "^2.1.2"
   }
 }

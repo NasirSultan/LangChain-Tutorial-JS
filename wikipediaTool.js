@@ -1,21 +1,27 @@
-import fetch from "node-fetch";
+// wikipediaTool.js
+import { DynamicStructuredTool } from "langchain/tools";
+import wiki from "wikipedia";
 
-export const WikipediaTool = {
-  name: "wikipedia_search",
-  description: "Search Wikipedia for general knowledge and information.",
-  async call(input) {
-    const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(
-      input
-    )}&format=json`;
-
-    const response = await fetch(searchUrl);
-    const data = await response.json();
-
-    if (!data.query.search.length) return "No results found.";
-
-    const first = data.query.search[0];
-    const pageUrl = `https://en.wikipedia.org/wiki/${first.title.replace(/ /g, "_")}`;
-
-    return ` ${first.title}\n\n${first.snippet.replace(/<\/?[^>]+(>|$)/g, "")}...\n🔗 ${pageUrl}`;
+export const WikipediaTool = new DynamicStructuredTool({
+  name: "searchWikipedia",
+  description: "Search Wikipedia for information about a specific topic.",
+  schema: {
+    type: "object",
+    properties: {
+      topic: {
+        type: "string",
+        description: "The topic to look up on Wikipedia",
+      },
+    },
+    required: ["topic"],
   },
-};
+  func: async ({ topic }) => {
+    try {
+      const page = await wiki.page(topic);
+      const summary = await page.summary();
+      return summary.extract;
+    } catch {
+      return "No Wikipedia result found.";
+    }
+  },
+});
