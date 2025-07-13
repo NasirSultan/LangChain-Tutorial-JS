@@ -1,39 +1,57 @@
-import { AgentExecutor, createOpenAIFunctionsAgent } from "langchain/agents";
-import { pull } from "langchain/hub";
+import "dotenv/config";
 import { ChatMistralAI } from "@langchain/mistralai";
+import { initializeAgentExecutorWithOptions } from "langchain/agents";
+import { BufferMemory } from "langchain/memory";
+import { DynamicTool } from "langchain/tools";
+import { evaluate } from "mathjs";
 
-// Load tools
-import { WikipediaTool } from "./wikipediaTool.js";
-import { YourDataTool } from "./yourDataTool.js";
 
-// Load prompt
-const prompt = await pull("hwchase17/openai-functions-agent");
+// ===== Calculator Tool =====
+const Calculator = new DynamicTool({
+  name: "calculator",
+  description: "Evaluates basic math expressions like 2 + 3 * 5 or (10 + 5) / 2.",
+  func: async (input) => {
+    try {
+      const result = evaluate(input);
+      return `The result is ${result}`;
+    } catch (err) {
+      return "Invalid math expression.";
+    }
+  },
+});
 
-// Use Mistral model
+
+// ===== Mistral Model =====
 const llm = new ChatMistralAI({
   model: "mistral-large-latest",
   temperature: 0,
+  apiKey: process.env.MISTRAL_API_KEY,
 });
 
-// Tools
-const tools = [WikipediaTool, YourDataTool];
 
-// Create agent
-const agent = await createOpenAIFunctionsAgent({
+// ===== Memory =====
+const memory = new BufferMemory({
+  returnMessages: true,
+  memoryKey: "chat_history",
+});
+
+
+// ===== Agent Executor =====
+const tools = [Calculator];
+
+const executor = await initializeAgentExecutorWithOptions(
+  tools,
   llm,
-  tools,
-  prompt,
-});
+  {
+    agentType: "chat-conversational-react-description",
+    memory,
+    verbose: true,
+  }
+);
 
-// Agent executor
-const agentExecutor = new AgentExecutor({
-  agent,
-  tools,
-});
 
-// Run agent
-const result = await agentExecutor.invoke({
-  input: "Tell me about Nasir's projects.",
-});
+const res1 = await executor.call({ input: "What is 25 + 75?" });
+console.log(" Response 1:", res1.output);
 
-console.log("Answer:", result);
+const res2 = await executor.call({ input: "Multiply that by 2" });
+console.log(" Response 2:", res2.output);
