@@ -16,6 +16,7 @@
     "@langchain/google-genai": "^0.2.13",
     "@langchain/langgraph": "^0.3.7",
     "@langchain/mistralai": "^0.2.1",
+    "@pinecone-database/pinecone": "^6.1.1",
     "dotenv": "^16.5.0",
     "langchain": "^0.3.29",
     "mathjs": "^14.5.3",

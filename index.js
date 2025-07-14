@@ -1,47 +1,21 @@
-import 'dotenv/config';
-import { ChatMistralAI } from "@langchain/mistralai";
-import { PlanAndExecuteAgentExecutor } from "langchain/experimental/plan_and_execute";
-import { DynamicStructuredTool } from "@langchain/core/tools";
-import { z } from "zod";
-import { evaluate } from "mathjs";
+import { Pinecone } from '@pinecone-database/pinecone';
 
-// Custom tools
-const getMyInfo = new DynamicStructuredTool({
-  name: "getMyInfo",
-  description: "Return developer’s skills",
-  schema: z.object({ query: z.string() }),
-  func: ({ query }) => query === "skills" ? "JavaScript, Node.js, React, AI, LangChain" : "Unknown",
-});
-const mathTool = new DynamicStructuredTool({
-  name: "mathCalculator",
-  description: "Evaluate math expressions",
-  schema: z.object({ expression: z.string() }),
-  func: ({ expression }) => {
-    try {
-      return `Result: ${evaluate(expression)}`;
-    } catch (e) {
-      return `Error: ${e.message}`;
-    }
-  },
-});
-const tools = [getMyInfo, mathTool];
-
-// LLM setup
-const llm = new ChatMistralAI({
-  model: "mistral-large-latest",
-  temperature: 0,
+const pc = new Pinecone({
+  apiKey: 'pcsk_6fyasn_9dtNYyaySJX6DHY3z79pkgUkdid5TQrzKvjNeZFcTXeCdfmCLmNKNNzYHM8Z36H'
 });
 
-// Create executor
-const executor = await PlanAndExecuteAgentExecutor.fromLLMAndTools({
-  llm,
-  tools,
-  verbose: true
+const index = pc.index(
+  'testing',
+  'https://testing-io05foq.svc.aped-4627-b74a.pinecone.io'
+);
+
+await index.namespace('example-namespace').update({
+  id: 'vec4',
+  metadata: {
+    category: 'mathematically',
+    quarter: 'Q4',
+    text: 'AAPL may consider healthcare integrations in Q4 to compete with tech rivals entering the consumer wellness space.'
+  }
 });
 
-// Invoke
-const result = await executor.invoke({
-  input: "Get my skills and calculate 13 * 7.",
-});
-
-console.log("\n✅ Result:\n", result);
+console.log('vec4 metadata updated.');
