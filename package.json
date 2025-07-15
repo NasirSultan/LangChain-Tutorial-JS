@@ -1,6 +1,7 @@
 {
   "name": "langchain-tuturial",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,7 +15,8 @@
     "@langchain/community": "^0.3.48",
     "@langchain/core": "^0.3.61",
     "@langchain/google-genai": "^0.2.13",
-    "@langchain/langgraph": "^0.3.7",
+    "@langchain/langgraph": "^0.3.8",
+    "@langchain/langgraph-supervisor": "^0.0.15",
     "@langchain/mistralai": "^0.2.1",
     "dotenv": "^16.5.0",
     "langchain": "^0.3.29",

@@ -1,91 +1,93 @@
 
+# Supervisor - LangGraph Agent Workflow Example
 
-**PlanAndExecuteAgentExecutor**
+This project demonstrates how to build a **multi-agent AI workflow** using [LangGraph](https://js.langchain.com/docs/langgraph), [MistralAI](https://docs.langchain.com/docs/ecosystem/integrations/chat/mistralai), and [LangChain tools](https://js.langchain.com/docs/modules/agents/tools/). A **supervisor agent** intelligently coordinates between:
 
----
+* A **Research Agent** to retrieve data (e.g. FAANG headcounts),
+* A **Math Agent** to perform calculations on the data.
 
-## Description
+## Use Case
 
-This project demonstrates the **Plan‑and‑Execute** agent available in LangChain. The agent uses a two-stage approach:
+> “What’s the combined headcount of the FAANG companies in 2024?”
 
-1. **Planner** – the language model breaks a user request into distinct, ordered steps.
-2. **Executor** – a tool-equipped agent executes each planned step in sequence.
+The supervisor delegates:
 
-This structure helps maintain focus and clarity on multi‑step tasks.
+1. Data gathering to `research_agent`,
+2. Math calculation to `math_agent`,
+3. Summarizes the result and returns it to the user.
 
----
+## Technologies and Libraries
 
-## Key Features
+* Node.js
+* LangGraph (`@langchain/langgraph-supervisor`, `@langchain/langgraph`)
+* LangChain Core (`@langchain/core`)
+* MistralAI via `@langchain/mistralai`
+* Zod for input schema validation
+* dotenv for managing environment variables
 
-* **Two‑stage pipeline**
-  Separates reasoning (planning) from action (execution), reducing tool misuse and improving structure.
+## Installation
 
-* **Modular tool usage**
-  Integrates diverse tools (e.g., calculator, custom info retriever) automatically during execution.
+1. Clone the Repository:
 
-* **Improved reliability**
-  Pre‑planning ensures tasks follow a coherent roadmap, reducing mistakes and drift ([LangChain Blog][1], [LangChain Blog][2]).
+```bash
+git clone https://github.com/your-username/supervisor-langgraph-example.git
+cd supervisor-langgraph-example
+```
 
-* **Ideal for complex tasks**
-  Efficient for workflows involving multiple dependent steps, such as research → calculation → summarization ([LangChain Blog][2], [Comet][3]).
+2. Install Dependencies:
 
----
+```bash
+npm install
+```
 
-## When to Use
+3. Setup Environment:
 
-Choose this agent when your task:
+Create a `.env` file in the root with your MistralAI API key:
 
-* Requires **multiple, ordered steps**.
-* Involves **specialized tools** at different stages.
-* Benefits from having a **clear execution plan** before taking action.
+```env
+MISTRAL_API_KEY=your-mistral-api-key
+```
 
-For simple single-step tasks (e.g., a quick math or lookup), a standard “ReAct” agent is lighter and faster.
+## Running the App
 
----
+```bash
+node index.js
+```
 
-## Setup and Run
+The program will output a JSON object that includes:
 
-1. Ensure you have the correct packages installed:
+* The final answer,
+* Intermediate steps (if `returnIntermediateSteps: true` is enabled).
 
-   ```bash
-   npm install langchain @langchain/core @langchain/mistralai mathjs dotenv zod
-   ```
+## Agents Overview
 
-2. Add `"type": "module"` to your `package.json`.
+| Agent            | Role                                    | Tools Used        |
+| ---------------- | --------------------------------------- | ----------------- |
+| `research_agent` | Fetch static web-like data (headcounts) | `web_search`      |
+| `math_agent`     | Perform arithmetic on numbers           | `add`, `multiply` |
 
-3. Create `index.js` using the `PlanAndExecuteAgentExecutor.fromLLMAndTools(...)` pattern with:
+## Project Structure
 
-   * `ChatMistralAI` as the LLM.
-   * Custom tools like `getMyInfo`.
-   * `mathjs` for evaluation.
+```
+.
+├── index.js          // Main application
+├── .env              // API keys
+└── README.md         // Project description
+```
 
-4. Run:
+## Example Output
 
-   ```bash
-   node index.js
-   ```
+```json
+{
+  "output": "The combined headcount of the FAANG companies in 2024 is 1,976,586.",
+  "steps": [...]
+}
+```
 
----
+## Notes
 
-## Why It Matters
+* This example uses mocked data in the `web_search` tool.
+* You can replace it with a real search tool from `@langchain/community/tools` or your own API integration.
 
-* **Structured precision**: The planner defines a complete task flow before execution.
-* **Efficiency**: The executor focuses on following the plan without repeated planning calls ([GitHub][4], [js.langchain.com][5]).
-* **Scalability**: Easily extendable with additional tools or memory for larger pipelines.
 
----
 
-## References
-
-* LangChain blog: “Plan‑and‑Execute Agents” ([LangChain Blog][2], [LangChain Blog][1])
-* JS documentation for `PlanAndExecuteAgentExecutor` ([js.langchain.com][5])
-
----
-
-Feel free to adapt it further based on your workflow or additional features!
-
-[1]: https://blog.langchain.com/plan-and-execute-agents/?utm_source=chatgpt.com "Plan-and-Execute Agents - LangChain Blog"
-[2]: https://blog.langchain.com/planning-agents/?utm_source=chatgpt.com "Plan-and-Execute Agents - LangChain Blog"
-[3]: https://www.comet.com/site/blog/plan-and-execute-agents-in-langchain/?utm_source=chatgpt.com "Plan-and-Execute Agents in Langchain - Comet"
-[4]: https://github.com/langchain-ai/langchainjs/discussions/3070?utm_source=chatgpt.com "PlanAndExecuteAgentExecutor calling dynamic function multiple ... - GitHub"
-[5]: https://js.langchain.com/v0.1/docs/modules/agents/agent_types/plan_and_execute/?utm_source=chatgpt.com "Plan and execute | ️ Langchain"
